@@ -1,7 +1,9 @@
 package com.example.lab4
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
@@ -19,59 +21,81 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.lab4.entities.Place
 import com.example.lab4.ui.theme.Lab4Theme
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.lab4.adapter.PlaceAdapter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
 
-    private lateinit var appViewModel: AppViewModel
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var placeAdapter: PlaceAdapter
+    private var places: List<Place> = emptyList() // Изначально пустой список
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Инициализация ViewModel
-        appViewModel = ViewModelProvider(this, AppViewModelFactory(application)).get(AppViewModel::class.java)
+        setContentView(R.layout.activity_main)
 
-        // Установка контента с использованием Compose
-        setContent {
-            Lab4Theme {
-                // Передаем appViewModel в Composable функции
-                MainScreen(appViewModel)
+        // Инициализация RecyclerView
+        recyclerView = findViewById(R.id.recycler_view)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+
+        val placeDao = AppDatabase.getDatabase(this).placeDao()
+
+        // Используем корутины для асинхронного получения данных
+        CoroutineScope(Dispatchers.IO).launch {
+            places = placeDao.getAllPlaces().first() // Получаем список мест из потока
+
+            // Обновляем UI на главном потоке
+            withContext(Dispatchers.Main) {
+                // Настройка адаптера для RecyclerView
+                placeAdapter = PlaceAdapter(places) { place ->
+                    // Обработка клика по элементу
+                    val intent = Intent(this@MainActivity, PlaceDetailsActivity::class.java)
+                    // Убедитесь, что place не null
+                    if (place != null) {
+                        intent.putExtra("PLACE", place)
+                        startActivity(intent)
+                    } else {
+                        Toast.makeText(this@MainActivity, "Place not found!", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                recyclerView.adapter = placeAdapter
             }
         }
-    }
-}
 
-@Composable
-fun MainScreen(appViewModel: AppViewModel) {
-    // Получаем список мест через collectAsState
-    val allPlaces = appViewModel.allPlaces.collectAsState(initial = emptyList()).value
-
-    // Показываем список мест
-    PlacesList(places = allPlaces)
-
-    // Кнопка для добавления нового места
-    AddPlaceButton(appViewModel)
-}
-
-@Composable
-fun PlacesList(places: List<Place>) {
-    LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        items(places) { place ->
-            PlaceItem(place = place)
+        // Кнопка добавления нового места
+        findViewById<Button>(R.id.add_button).setOnClickListener {
+            val intent = Intent(this, AddEditPlaceActivity::class.java)
+            startActivity(intent)
         }
     }
-}
 
-@Composable
-fun PlaceItem(place: Place) {
-    Text(text = place.title)
-}
-
-@Composable
-fun AddPlaceButton(appViewModel: AppViewModel) {
-    Button(onClick = {
-        // Добавляем новое место
-        val newPlace = Place(title = "New Place", description = "New Description", location = "Location", type = "Museum")
-        appViewModel.addPlace(newPlace)
-    }) {
-        Text("Add New Place")
+    override fun onResume() {
+        super.onResume()
+        // Обновляем список мест после возвращения из другой активности
+        val placeDao = AppDatabase.getDatabase(this).placeDao()
+        CoroutineScope(Dispatchers.IO).launch {
+            places = placeDao.getAllPlaces().first() // Получаем актуальный список мест
+            withContext(Dispatchers.Main) {
+                placeAdapter = PlaceAdapter(places) { place ->
+                    // Обработка клика по элементу
+                    val intent = Intent(this@MainActivity, PlaceDetailsActivity::class.java)
+                    // Убедитесь, что place не null
+                    if (place != null) {
+                        intent.putExtra("PLACE", place)
+                        startActivity(intent)
+                    } else {
+                        Toast.makeText(this@MainActivity, "Place not found!", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                recyclerView.adapter = placeAdapter
+            }
+        }
     }
 }

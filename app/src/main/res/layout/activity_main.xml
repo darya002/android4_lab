@@ -1,45 +1,17 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:orientation="vertical">
 
-    <!-- Заголовок -->
-    <TextView
-        android:id="@+id/textViewTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Путеводитель по достопримечательностям"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:layout_gravity="center"
-        />
-
-    <!-- RecyclerView для отображения списка достопримечательностей -->
-    <RecyclerView
-        android:id="@+id/recyclerViewPlaces"
+    <Button
+        android:id="@+id/add_button"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_marginBottom="16dp"
-        android:scrollbars="vertical" />
-
-    <!-- Кнопка для добавления нового места -->
-    <Button
-        android:id="@+id/buttonAddPlace"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Добавить место"
-        android:layout_gravity="center"
-        />
+        android:text="Добавить место" />
 
-    <!-- Кнопка для добавления заметки -->
-    <Button
-        android:id="@+id/buttonAddNote"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Добавить заметку"
-        android:layout_gravity="center" />
-
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 </LinearLayout>

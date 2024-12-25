@@ -30,7 +30,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <!-- Активность для добавления/редактирования -->
+        <activity
+            android:name=".AddEditPlaceActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:exported="true" />
 
+        <!-- Активность для отображения деталей -->
+        <activity
+            android:name=".PlaceDetailsActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:exported="true" />
     </application>
 
 </manifest>
