@@ -2,14 +2,14 @@ package com.example.lab4
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import com.example.lab4.dao.NoteDao
 import com.example.lab4.dao.PlaceDao
 import com.example.lab4.entities.Note
 import com.example.lab4.entities.Place
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class AppViewModel(application: Application) : AndroidViewModel(application) {
@@ -17,14 +17,11 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     private val placeDao: PlaceDao = AppDatabase.getDatabase(application).placeDao()
     private val noteDao: NoteDao = AppDatabase.getDatabase(application).noteDao()
 
-    // Для хранения списка достопримечательностей и заметок
-    val allPlaces: LiveData<List<Place>> = liveData(Dispatchers.IO) {
-        emit(placeDao.getAllPlaces())
-    }
+    // Используем Flow для списка достопримечательностей
+    val allPlaces: Flow<List<Place>> = placeDao.getAllPlaces()
 
-    val allNotes: LiveData<List<Note>> = liveData(Dispatchers.IO) {
-        emit(noteDao.getAllNotes())
-    }
+    // Используем Flow для списка заметок
+    val allNotes: Flow<List<Note>> = noteDao.getAllNotes()
 
     // Методы для добавления, обновления и удаления данных
     fun addPlace(place: Place) {
