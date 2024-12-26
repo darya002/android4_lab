@@ -18,8 +18,8 @@ class PlaceDetailsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_place_details)
 
-        // Получаем объект Place из Intent, проверяя, что он не null
-        val place = intent.getSerializableExtra("PLACE") as? Place
+        // Получаем объект Place из Intent, используя getParcelableExtra
+        val place = intent.getParcelableExtra<Place>("PLACE")
         if (place == null) {
             Toast.makeText(this, "Place not found", Toast.LENGTH_SHORT).show()
             finish() // Завершаем активность, если место не найдено
