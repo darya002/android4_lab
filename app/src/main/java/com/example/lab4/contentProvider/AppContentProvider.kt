@@ -61,28 +61,41 @@ class AppContentProvider : ContentProvider() {
         selectionArgs: Array<String>?,
         sortOrder: String?
     ): Cursor? {
+        // Создаем MatrixCursor с колонками
         val cursor = MatrixCursor(arrayOf("id", "title", "description", "location", "type"))
 
+        // Запускаем корутину для работы с базой данных
         CoroutineScope(Dispatchers.IO).launch {
             when (URI_MATCHER.match(uri)) {
                 PLACES -> {
-                    val places = database.placeDao().getAllPlaces()
-                    places.forEach {
-                        cursor.addRow(arrayOf(it.id, it.title, it.description, it.location, it.type))
+                    // Получаем список мест из базы данных (через Flow)
+                    database.placeDao().getAllPlaces().collect { places ->
+                        // Используем collect для обработки элементов
+                        places.map { place ->
+                            // Добавляем строку в курсор
+                            cursor.addRow(listOf(place.id, place.title, place.description, place.location, place.type))
+                        }
                     }
                 }
                 NOTES -> {
-                    val notes = database.noteDao().getAllNotes()
-                    notes.forEach {
-                        cursor.addRow(arrayOf(it.id, it.visited, it.notes))
+                    // Получаем список заметок из базы данных (через Flow)
+                    database.noteDao().getAllNotes().collect { notes ->
+                        // Используем collect для обработки элементов
+                        notes.map { note ->
+                            // Добавляем строку в курсор
+                            cursor.addRow(listOf(note.id, note.visited, note.notes))
+                        }
                     }
                 }
                 else -> throw IllegalArgumentException("Unknown URI: $uri")
             }
         }
 
+        // Возвращаем курсор
         return cursor
     }
+
+
 
     override fun update(uri: Uri, values: ContentValues?, selection: String?, selectionArgs: Array<String>?): Int {
         var rowsUpdated = 0

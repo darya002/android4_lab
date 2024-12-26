@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.lab4.R
 import com.example.lab4.entities.Place
 
-class PlaceAdapter(private val places: List<Place>) : RecyclerView.Adapter<PlaceAdapter.PlaceViewHolder>() {
+class PlaceAdapter(private val places: List<Place>, private val onItemClick: (Place) -> Unit) : RecyclerView.Adapter<PlaceAdapter.PlaceViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PlaceViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_place, parent, false)
@@ -17,14 +17,22 @@ class PlaceAdapter(private val places: List<Place>) : RecyclerView.Adapter<Place
 
     override fun onBindViewHolder(holder: PlaceViewHolder, position: Int) {
         val place = places[position]
-        holder.title.text = place.title
-        holder.description.text = place.description
+        holder.bind(place)
     }
 
     override fun getItemCount(): Int = places.size
 
-    class PlaceViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val title: TextView = itemView.findViewById(R.id.textViewPlaceTitle)
-        val description: TextView = itemView.findViewById(R.id.textViewPlaceDescription)
+    inner class PlaceViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val placeName: TextView = itemView.findViewById(R.id.place_name)
+        private val placeDescription: TextView = itemView.findViewById(R.id.place_description)
+
+        fun bind(place: Place) {
+            placeName.text = place.title
+            placeDescription.text = place.description
+
+            itemView.setOnClickListener {
+                onItemClick(place)
+            }
+        }
     }
 }

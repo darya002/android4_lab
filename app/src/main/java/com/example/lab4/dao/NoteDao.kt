@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.example.lab4.entities.Note
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface NoteDao {
@@ -19,5 +20,5 @@ interface NoteDao {
     suspend fun deleteNote(note: Note)
 
     @Query("SELECT * FROM notes")
-    suspend fun getAllNotes(): List<Note>
+    fun getAllNotes(): Flow<List<Note>>  // Возвращаем Flow для асинхронных данных
 }
