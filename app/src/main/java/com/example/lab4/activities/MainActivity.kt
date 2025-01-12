@@ -1,21 +1,16 @@
-package com.example.lab4
+package com.example.lab4.activities
 
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
-import androidx.lifecycle.ViewModelProvider
-import com.example.lab4.entities.Place
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.lab4.R
 import com.example.lab4.adapter.PlaceAdapter
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.example.lab4.collectInLifecycle
+import com.example.lab4.viewModels.AppViewModel
 
 class MainActivity : ComponentActivity() {
 
