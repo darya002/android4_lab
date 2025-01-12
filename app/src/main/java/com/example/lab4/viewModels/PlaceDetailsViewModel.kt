@@ -7,7 +7,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.lab4.AppDatabase
 import com.example.lab4.dao.PlaceDao
+import com.example.lab4.entities.Note
 import com.example.lab4.entities.Place
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -17,6 +19,7 @@ class PlaceDetailsViewModel(application: Application) : AndroidViewModel(applica
 
     private val _place = MutableLiveData<Place?>()
     val place: LiveData<Place?> get() = _place
+    private val noteDao = AppDatabase.getDatabase(application).noteDao()
 
     fun setPlace(place: Place?) {
         _place.value = place
@@ -28,7 +31,14 @@ class PlaceDetailsViewModel(application: Application) : AndroidViewModel(applica
             _place.postValue(placeDao.getPlaceById(id))  // Обновляем данные о месте
         }
     }
-
+    fun getNotesForPlace(placeId: Long): LiveData<List<Note>> {
+        val notes = MutableLiveData<List<Note>>()
+        CoroutineScope(Dispatchers.IO).launch {
+            val placeNotes = noteDao.getNotesForPlace(placeId)
+            notes.postValue(placeNotes)
+        }
+        return notes
+    }
     fun deletePlace(place: Place) {
         viewModelScope.launch(Dispatchers.IO) {
             placeDao.deletePlace(place)
