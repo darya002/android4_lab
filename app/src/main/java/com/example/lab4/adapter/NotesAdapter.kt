@@ -19,7 +19,6 @@ class NotesAdapter(private val notes: List<Note>) : RecyclerView.Adapter<NotesAd
     override fun onBindViewHolder(holder: NoteViewHolder, position: Int) {
         val note = notes[position]
         holder.noteText.text = note.notes
-        holder.visitedCheckBox.isChecked = note.visited
     }
 
     override fun getItemCount(): Int {
@@ -28,6 +27,5 @@ class NotesAdapter(private val notes: List<Note>) : RecyclerView.Adapter<NotesAd
 
     class NoteViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val noteText: TextView = itemView.findViewById(R.id.note_text)
-        val visitedCheckBox: CheckBox = itemView.findViewById(R.id.visited_checkbox)
     }
 }

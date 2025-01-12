@@ -36,9 +36,11 @@ class PlaceDetailsActivity : AppCompatActivity() {
 
         val placeNameDetail: TextView = findViewById(R.id.place_name_detail)
         val placeDescriptionDetail: TextView = findViewById(R.id.place_description_detail)
+        val placeType: TextView = findViewById(R.id.place_type)
+        val placeLocation: TextView = findViewById(R.id.place_location)
         val editButton: Button = findViewById(R.id.edit_button)
         val deleteButton: Button = findViewById(R.id.delete_button)
-        val visitedCheckBox: CheckBox = findViewById(R.id.visited_checkbox)
+//        val visitedCheckBox: CheckBox = findViewById(R.id.visited_checkbox)
         val addNoteButton: Button = findViewById(R.id.add_note_button)
         val notesRecyclerView: RecyclerView = findViewById(R.id.notes_recycler_view)
 
@@ -46,16 +48,18 @@ class PlaceDetailsActivity : AppCompatActivity() {
             if (currentPlace != null) {
                 placeNameDetail.text = currentPlace.title
                 placeDescriptionDetail.text = currentPlace.description
-                visitedCheckBox.isChecked = currentPlace.visited
+                placeLocation.text = currentPlace.location
+                placeType.text = currentPlace.type
+//                visitedCheckBox.isChecked = currentPlace.visited
                 loadNotesForPlace(currentPlace.id)
             }
         }
 
-        visitedCheckBox.setOnCheckedChangeListener { _, isChecked ->
-            place?.let {
-                viewModel.updateVisited(it.id, isChecked)
-            }
-        }
+//        visitedCheckBox.setOnCheckedChangeListener { _, isChecked ->
+//            place?.let {
+//                viewModel.updateVisited(it.id, isChecked)
+//            }
+//        }
 
         editButton.setOnClickListener {
             val intent = Intent(this, AddEditPlaceActivity::class.java)

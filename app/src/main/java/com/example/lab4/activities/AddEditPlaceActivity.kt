@@ -18,21 +18,17 @@ class AddEditPlaceActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_edit_place)
 
-        // Инициализация ViewModel
         viewModel = ViewModelProvider(this)[AddEditPlaceViewModel::class.java]
 
-        // Получаем ссылки на поля ввода
         val placeName: EditText = findViewById(R.id.place_name)
         val placeDescription: EditText = findViewById(R.id.place_description)
         val placeLocation: EditText = findViewById(R.id.place_location)
         val placeType: EditText = findViewById(R.id.place_type)
         val saveButton: Button = findViewById(R.id.save_button)
 
-        // Получаем объект Place из Intent
         val place = intent.getParcelableExtra<Place>("PLACE")
         viewModel.setPlace(place)
 
-        // Подписка на изменения в place
         viewModel.place.observe(this) { currentPlace ->
             if (currentPlace != null) {
                 placeName.setText(currentPlace.title)
@@ -42,7 +38,6 @@ class AddEditPlaceActivity : AppCompatActivity() {
             }
         }
 
-        // Сохранение данных
         saveButton.setOnClickListener {
             val updatedPlace = Place(
                 id = place?.id ?: 0,
@@ -53,8 +48,7 @@ class AddEditPlaceActivity : AppCompatActivity() {
             )
             viewModel.savePlace(updatedPlace)
 
-            // Переход к деталям места после сохранения
-            val intent = Intent(this, MainActivity::class.java)
+            val intent = Intent(this, PlaceDetailsActivity::class.java)
             intent.putExtra("PLACE", updatedPlace)
             startActivity(intent)
             finish()

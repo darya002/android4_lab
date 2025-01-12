@@ -25,12 +25,6 @@ class PlaceDetailsViewModel(application: Application) : AndroidViewModel(applica
         _place.value = place
     }
 
-    fun updateVisited(id: Long, visited: Boolean) {
-        viewModelScope.launch(Dispatchers.IO) {
-            placeDao.updateVisited(id, visited)
-            _place.postValue(placeDao.getPlaceById(id))  // Обновляем данные о месте
-        }
-    }
     fun getNotesForPlace(placeId: Long): LiveData<List<Note>> {
         val notes = MutableLiveData<List<Note>>()
         CoroutineScope(Dispatchers.IO).launch {

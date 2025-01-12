@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">lab4</string>
+    <string name="add_note">Add Note</string>
+    <string name="notes">Notes</string>
+    <string name="delete">Delete</string>
+    <string name="edit">Edit</string>
+    <string name="place_type">Place Type</string>
+    <string name="place_location">Place Location</string>
+    <string name="place_description">Place Description</string>
+    <string name="place_name">Place Name</string>
+    <string name="enter_your_note">Enter your note</string>
+    <string name="save_note">Save Note</string>
 </resources>

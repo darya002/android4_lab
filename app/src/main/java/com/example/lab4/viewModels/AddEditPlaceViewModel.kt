@@ -15,7 +15,6 @@ class AddEditPlaceViewModel(application: Application) : AndroidViewModel(applica
 
     private val placeDao: PlaceDao = AppDatabase.getDatabase(application).placeDao()
 
-    // LiveData для текущего места
     private val _place = MutableLiveData<Place?>()
     val place: LiveData<Place?> = _place
 

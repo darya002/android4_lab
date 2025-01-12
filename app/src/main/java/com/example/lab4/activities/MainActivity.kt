@@ -22,11 +22,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Инициализация RecyclerView
         recyclerView = findViewById(R.id.recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        // Подписываемся на данные из ViewModel
         appViewModel.allPlaces.collectInLifecycle(this) { places ->
             placeAdapter = PlaceAdapter(
                 places,
@@ -42,7 +40,6 @@ class MainActivity : ComponentActivity() {
             recyclerView.adapter = placeAdapter
         }
 
-        // Кнопка добавления нового места
         findViewById<Button>(R.id.add_button).setOnClickListener {
             val intent = Intent(this, AddEditPlaceActivity::class.java)
             startActivity(intent)

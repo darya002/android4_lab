@@ -41,8 +41,7 @@ class AppContentProvider : ContentProvider() {
                 }
                 NOTES -> {
                     val note = Note(
-                        place_id = values?.getAsLong("place_id") ?: 0L,  // Добавляем place_id
-                        visited = values?.getAsBoolean("visited") ?: false,
+                        place_id = values?.getAsLong("place_id") ?: 0L,
                         notes = values?.getAsString("notes") ?: ""
                     )
                     // Асинхронно вставляем данные в базу
@@ -83,7 +82,7 @@ class AppContentProvider : ContentProvider() {
                         // Используем collect для обработки элементов
                         notes.forEach { note ->
                             // Добавляем строку в курсор
-                            cursor.addRow(arrayOf(note.id, note.visited, note.notes))
+                            cursor.addRow(arrayOf(note.id, note.notes))
                         }
                     }
                 }
@@ -116,8 +115,7 @@ class AppContentProvider : ContentProvider() {
                 NOTES -> {
                     val noteId = selectionArgs?.get(0)?.toLong() ?: 0L
                     val note = Note(
-                        place_id = values?.getAsLong("place_id") ?: 0L,  // Убедитесь, что place_id передается
-                        visited = values?.getAsBoolean("visited") ?: false,
+                        place_id = values?.getAsLong("place_id") ?: 0L,
                         notes = values?.getAsString("notes") ?: ""
                     )
                     // Обновляем заметку в базе данных
@@ -145,7 +143,7 @@ class AppContentProvider : ContentProvider() {
                     val placeId = selectionArgs?.get(1)?.toLong() ?: 0L // Получаем place_id из selectionArgs
 
                     // Создаем объект Note с переданным place_id
-                    val note = Note(id = noteId, place_id = placeId, visited = false, notes = "")
+                    val note = Note(id = noteId, place_id = placeId, notes = "")
                     database.noteDao().deleteNote(note)
                     rowsDeleted = 1 // Возвращаем количество удаленных строк
                 }

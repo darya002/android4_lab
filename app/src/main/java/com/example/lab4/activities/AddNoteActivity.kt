@@ -19,7 +19,6 @@ class AddNoteActivity : AppCompatActivity() {
 
     private var placeId by Delegates.notNull<Long>()
     private lateinit var notesEditText: EditText
-    private lateinit var visitedCheckBox: CheckBox
     private lateinit var saveButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,16 +28,13 @@ class AddNoteActivity : AppCompatActivity() {
         placeId = intent.getLongExtra("PLACE_ID", 0L)
 
         notesEditText = findViewById(R.id.notes_edit_text)
-        visitedCheckBox = findViewById(R.id.visited_checkbox)
         saveButton = findViewById(R.id.save_button)
 
         saveButton.setOnClickListener {
             val notes = notesEditText.text.toString()
-            val visited = visitedCheckBox.isChecked
 
             val note = Note(
                 place_id = placeId,
-                visited = visited,
                 notes = notes
             )
 
@@ -48,11 +44,9 @@ class AddNoteActivity : AppCompatActivity() {
                 runOnUiThread {
                     Toast.makeText(this@AddNoteActivity, "Note added", Toast.LENGTH_SHORT).show()
 
-                    // Переход на MainActivity после добавления заметки
                     val intent = Intent(this@AddNoteActivity, MainActivity::class.java)
                     startActivity(intent)
 
-                    // Завершаем текущую активность
                     finish()
                 }
             }

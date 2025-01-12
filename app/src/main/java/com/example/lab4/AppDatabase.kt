@@ -11,7 +11,7 @@ import com.example.lab4.entities.Note
 import com.example.lab4.entities.Place
 import com.example.lab4.entities.PlaceNoteCrossRef
 
-@Database(entities = [Place::class, Note::class, PlaceNoteCrossRef::class], version = 3)
+@Database(entities = [Place::class, Note::class, PlaceNoteCrossRef::class], version = 4)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun placeDao(): PlaceDao

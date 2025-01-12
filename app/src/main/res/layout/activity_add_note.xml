@@ -7,20 +7,14 @@
 
     <EditText
         android:id="@+id/notes_edit_text"
-        android:hint="Enter your note"
+        android:hint="@string/enter_your_note"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="textMultiLine"/>
 
-    <CheckBox
-        android:id="@+id/visited_checkbox"
-        android:text="Visited"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-
     <Button
         android:id="@+id/save_button"
-        android:text="Save Note"
+        android:text="@string/save_note"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 </LinearLayout>

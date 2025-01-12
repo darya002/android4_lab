@@ -10,15 +10,17 @@
     <TextView
         android:id="@+id/note_text"
         android:text="Note text"
-        android:textSize="16sp"
+        android:textSize="20sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:maxLines="3"
         android:ellipsize="end"/>
 
-    <CheckBox
-        android:id="@+id/visited_checkbox"
-        android:text="Visited"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+    <Button
+        android:id="@+id/add_note_button"
+        android:text="Delete"
+        android:textSize="20sp"
+        android:layout_width="50pt"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"/>
+
 </LinearLayout>
