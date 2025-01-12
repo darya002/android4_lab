@@ -5,11 +5,11 @@ import android.os.Bundle
 import android.widget.Button
 import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.lab4.R
 import com.example.lab4.adapter.PlaceAdapter
-import com.example.lab4.collectInLifecycle
 import com.example.lab4.viewModels.AppViewModel
 
 class MainActivity : ComponentActivity() {
@@ -25,19 +25,21 @@ class MainActivity : ComponentActivity() {
         recyclerView = findViewById(R.id.recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        appViewModel.allPlaces.collectInLifecycle(this) { places ->
-            placeAdapter = PlaceAdapter(
-                places,
-                onItemClick = { place ->
-                    val intent = Intent(this@MainActivity, PlaceDetailsActivity::class.java)
-                    intent.putExtra("PLACE", place)
-                    startActivity(intent)
-                },
-                onVisitedChange = { place, isChecked ->
-                    appViewModel.updateVisited(place.id, isChecked)
-                }
-            )
-            recyclerView.adapter = placeAdapter
+        lifecycleScope.launchWhenStarted {
+            appViewModel.allPlaces.collect { places ->
+                placeAdapter = PlaceAdapter(
+                    places,
+                    onItemClick = { place ->
+                        val intent = Intent(this@MainActivity, PlaceDetailsActivity::class.java)
+                        intent.putExtra("PLACE", place)
+                        startActivity(intent)
+                    },
+                    onVisitedChange = { place, isChecked ->
+                        appViewModel.updateVisited(place.id, isChecked)
+                    }
+                )
+                recyclerView.adapter = placeAdapter
+            }
         }
 
         findViewById<Button>(R.id.add_button).setOnClickListener {
