@@ -1,11 +1,13 @@
 package com.example.lab4.activities
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
-import android.widget.CheckBox
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,6 +24,8 @@ class PlaceDetailsActivity : AppCompatActivity() {
     private lateinit var notesAdapter: NotesAdapter
     private lateinit var notesRecyclerView: RecyclerView
 
+    private lateinit var addNoteLauncher: ActivityResultLauncher<Intent>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_place_details)
@@ -36,6 +40,7 @@ class PlaceDetailsActivity : AppCompatActivity() {
         }
         viewModel.setPlace(place)
 
+        // Инициализация UI
         val placeNameDetail: TextView = findViewById(R.id.place_name_detail)
         val placeDescriptionDetail: TextView = findViewById(R.id.place_description_detail)
         val placeType: TextView = findViewById(R.id.place_type)
@@ -45,11 +50,22 @@ class PlaceDetailsActivity : AppCompatActivity() {
         val addNoteButton: Button = findViewById(R.id.add_note_button)
         notesRecyclerView = findViewById(R.id.notes_recycler_view)
 
+        // Установка адаптера
         notesRecyclerView.layoutManager = LinearLayoutManager(this)
         notesAdapter = NotesAdapter(mutableListOf()) { note ->
             deleteNote(note)
         }
         notesRecyclerView.adapter = notesAdapter
+
+        // Регистрация ActivityResultLauncher для запуска AddNoteActivity
+        addNoteLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                // Обновляем список заметок после добавления
+                place?.let {
+                    loadNotesForPlace(it.id)
+                }
+            }
+        }
 
         viewModel.place.observe(this) { currentPlace ->
             if (currentPlace != null) {
@@ -76,7 +92,7 @@ class PlaceDetailsActivity : AppCompatActivity() {
         addNoteButton.setOnClickListener {
             val intent = Intent(this, AddNoteActivity::class.java)
             intent.putExtra("PLACE_ID", place.id)
-            startActivity(intent)
+            addNoteLauncher.launch(intent) // Запуск AddNoteActivity с использованием ActivityResultLauncher
         }
     }
 
@@ -87,8 +103,8 @@ class PlaceDetailsActivity : AppCompatActivity() {
     }
 
     private fun deleteNote(note: Note) {
-        viewModel.deleteNote(note) // Удаляем заметку из базы
-        notesAdapter.removeNote(note) // Удаляем из списка адаптера
+        viewModel.deleteNote(note)
+        notesAdapter.removeNote(note)
         Toast.makeText(this, "Note deleted", Toast.LENGTH_SHORT).show()
     }
 }
