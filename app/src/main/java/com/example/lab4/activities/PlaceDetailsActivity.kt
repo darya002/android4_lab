@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.lab4.R
 import com.example.lab4.adapter.NotesAdapter
+import com.example.lab4.entities.Note
 import com.example.lab4.entities.Place
 import com.example.lab4.viewModels.PlaceDetailsViewModel
 
@@ -19,6 +20,7 @@ class PlaceDetailsActivity : AppCompatActivity() {
 
     private lateinit var viewModel: PlaceDetailsViewModel
     private lateinit var notesAdapter: NotesAdapter
+    private lateinit var notesRecyclerView: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,9 +42,14 @@ class PlaceDetailsActivity : AppCompatActivity() {
         val placeLocation: TextView = findViewById(R.id.place_location)
         val editButton: Button = findViewById(R.id.edit_button)
         val deleteButton: Button = findViewById(R.id.delete_button)
-//        val visitedCheckBox: CheckBox = findViewById(R.id.visited_checkbox)
         val addNoteButton: Button = findViewById(R.id.add_note_button)
-        val notesRecyclerView: RecyclerView = findViewById(R.id.notes_recycler_view)
+        notesRecyclerView = findViewById(R.id.notes_recycler_view)
+
+        notesRecyclerView.layoutManager = LinearLayoutManager(this)
+        notesAdapter = NotesAdapter(mutableListOf()) { note ->
+            deleteNote(note)
+        }
+        notesRecyclerView.adapter = notesAdapter
 
         viewModel.place.observe(this) { currentPlace ->
             if (currentPlace != null) {
@@ -50,16 +57,9 @@ class PlaceDetailsActivity : AppCompatActivity() {
                 placeDescriptionDetail.text = currentPlace.description
                 placeLocation.text = currentPlace.location
                 placeType.text = currentPlace.type
-//                visitedCheckBox.isChecked = currentPlace.visited
                 loadNotesForPlace(currentPlace.id)
             }
         }
-
-//        visitedCheckBox.setOnCheckedChangeListener { _, isChecked ->
-//            place?.let {
-//                viewModel.updateVisited(it.id, isChecked)
-//            }
-//        }
 
         editButton.setOnClickListener {
             val intent = Intent(this, AddEditPlaceActivity::class.java)
@@ -78,16 +78,17 @@ class PlaceDetailsActivity : AppCompatActivity() {
             intent.putExtra("PLACE_ID", place.id)
             startActivity(intent)
         }
-
-        notesRecyclerView.layoutManager = LinearLayoutManager(this)
-        notesAdapter = NotesAdapter(emptyList())
-        notesRecyclerView.adapter = notesAdapter
     }
 
     private fun loadNotesForPlace(placeId: Long) {
         viewModel.getNotesForPlace(placeId).observe(this) { notes ->
-            notesAdapter = NotesAdapter(notes)
-            findViewById<RecyclerView>(R.id.notes_recycler_view).adapter = notesAdapter
+            notesAdapter.updateNotes(notes) // Обновляем данные в адаптере
         }
+    }
+
+    private fun deleteNote(note: Note) {
+        viewModel.deleteNote(note) // Удаляем заметку из базы
+        notesAdapter.removeNote(note) // Удаляем из списка адаптера
+        Toast.makeText(this, "Note deleted", Toast.LENGTH_SHORT).show()
     }
 }

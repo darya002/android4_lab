@@ -38,4 +38,9 @@ class PlaceDetailsViewModel(application: Application) : AndroidViewModel(applica
             placeDao.deletePlace(place)
         }
     }
+    fun deleteNote(note: Note) {
+        viewModelScope.launch(Dispatchers.IO) {
+            AppDatabase.getDatabase(getApplication()).noteDao().deleteNote(note)
+        }
+    }
 }
