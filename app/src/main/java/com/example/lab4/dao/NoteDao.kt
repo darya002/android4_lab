@@ -20,5 +20,8 @@ interface NoteDao {
     suspend fun deleteNote(note: Note)
 
     @Query("SELECT * FROM notes")
-    fun getAllNotes(): Flow<List<Note>>  // Возвращаем Flow для асинхронных данных
+    fun getAllNotes(): Flow<List<Note>>
+
+    @Query("SELECT * FROM notes WHERE place_id = :placeId")
+    suspend fun getNotesForPlace(placeId: Long): List<Note>
 }

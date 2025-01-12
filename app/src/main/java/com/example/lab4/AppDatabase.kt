@@ -11,7 +11,7 @@ import com.example.lab4.entities.Note
 import com.example.lab4.entities.Place
 import com.example.lab4.entities.PlaceNoteCrossRef
 
-@Database(entities = [Place::class, Note::class, PlaceNoteCrossRef::class], version = 1)
+@Database(entities = [Place::class, Note::class, PlaceNoteCrossRef::class], version = 4)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun placeDao(): PlaceDao
@@ -24,13 +24,14 @@ abstract class AppDatabase : RoomDatabase() {
 
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
-                val instance = Room.databaseBuilder(
+                Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "app_db"
-                ).build()
-                INSTANCE = instance
-                instance
+                    "place_database"
+                )
+                    .fallbackToDestructiveMigration() // Удаление данных при изменении схемы
+                    .build()
+                    .also { INSTANCE = it }
             }
         }
     }

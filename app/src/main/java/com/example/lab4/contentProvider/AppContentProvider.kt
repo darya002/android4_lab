@@ -12,7 +12,10 @@ import com.example.lab4.entities.Note
 import com.example.lab4.entities.Place
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.forEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 
 class AppContentProvider : ContentProvider() {
 
@@ -27,7 +30,7 @@ class AppContentProvider : ContentProvider() {
     }
 
     override fun insert(uri: Uri, values: ContentValues?): Uri? {
-        CoroutineScope(Dispatchers.IO).launch {
+        return runBlocking {
             when (URI_MATCHER.match(uri)) {
                 PLACES -> {
                     val place = Place(
@@ -36,21 +39,24 @@ class AppContentProvider : ContentProvider() {
                         location = values?.getAsString("location") ?: "",
                         type = values?.getAsString("type") ?: ""
                     )
-                    // Асинхронно вставляем данные в базу
-                    database.placeDao().insertPlace(place)
+                    val id = withContext(Dispatchers.IO) {
+                        database.placeDao().insertPlace(place)
+                    }
+                    return@runBlocking Uri.withAppendedPath(uri, id.toString()) // Возвращаем Uri с ID
                 }
                 NOTES -> {
                     val note = Note(
-                        visited = values?.getAsBoolean("visited") ?: false,
+                        place_id = values?.getAsLong("place_id") ?: 0L,
                         notes = values?.getAsString("notes") ?: ""
                     )
-                    // Асинхронно вставляем данные в базу
-                    database.noteDao().insertNote(note)
+                    val id = withContext(Dispatchers.IO) {
+                        database.noteDao().insertNote(note)
+                    }
+                    return@runBlocking Uri.withAppendedPath(uri, id.toString()) // Возвращаем Uri с ID
                 }
                 else -> throw IllegalArgumentException("Unknown URI: $uri")
             }
         }
-        return Uri.withAppendedPath(uri, "someId") // Здесь возвращаем URI с каким-либо ID
     }
 
 
@@ -61,40 +67,35 @@ class AppContentProvider : ContentProvider() {
         selectionArgs: Array<String>?,
         sortOrder: String?
     ): Cursor? {
-        // Создаем MatrixCursor с колонками
         val cursor = MatrixCursor(arrayOf("id", "title", "description", "location", "type"))
-
-        // Запускаем корутину для работы с базой данных
-        CoroutineScope(Dispatchers.IO).launch {
+        runBlocking {
             when (URI_MATCHER.match(uri)) {
                 PLACES -> {
-                    // Получаем список мест из базы данных (через Flow)
-                    database.placeDao().getAllPlaces().collect { places ->
-                        // Используем collect для обработки элементов
-                        places.map { place ->
-                            // Добавляем строку в курсор
-                            cursor.addRow(listOf(place.id, place.title, place.description, place.location, place.type))
+                    // Используем collect для Flow
+                    val places = withContext(Dispatchers.IO) {
+                        database.placeDao().getAllPlaces() // Это Flow
+                    }
+                    places.collect { placesList ->
+                        placesList.forEach { place ->
+                            cursor.addRow(arrayOf(place.id, place.title, place.description, place.location, place.type))
                         }
                     }
                 }
                 NOTES -> {
-                    // Получаем список заметок из базы данных (через Flow)
-                    database.noteDao().getAllNotes().collect { notes ->
-                        // Используем collect для обработки элементов
-                        notes.map { note ->
-                            // Добавляем строку в курсор
-                            cursor.addRow(listOf(note.id, note.visited, note.notes))
+                    val notes = withContext(Dispatchers.IO) {
+                        database.noteDao().getAllNotes() // Это Flow
+                    }
+                    notes.collect { notesList ->
+                        notesList.forEach { note ->
+                            cursor.addRow(arrayOf(note.id, note.notes))
                         }
                     }
                 }
                 else -> throw IllegalArgumentException("Unknown URI: $uri")
             }
         }
-
-        // Возвращаем курсор
         return cursor
     }
-
 
 
     override fun update(uri: Uri, values: ContentValues?, selection: String?, selectionArgs: Array<String>?): Int {
@@ -103,8 +104,9 @@ class AppContentProvider : ContentProvider() {
         CoroutineScope(Dispatchers.IO).launch {
             when (URI_MATCHER.match(uri)) {
                 PLACES -> {
+                    val placeId = selectionArgs?.get(0)?.toLong() ?: 0L
                     val place = Place(
-                        id = selectionArgs?.get(0)?.toLong() ?: 0L,
+                        id = placeId,
                         title = values?.getAsString("title") ?: "",
                         description = values?.getAsString("description") ?: "",
                         location = values?.getAsString("location") ?: "",
@@ -112,17 +114,17 @@ class AppContentProvider : ContentProvider() {
                     )
                     // Обновляем место в базе данных
                     database.placeDao().updatePlace(place)
-                    rowsUpdated = 1 // Возвращаем количество обновленных строк
+                    rowsUpdated = 1
                 }
                 NOTES -> {
+                    val noteId = selectionArgs?.get(0)?.toLong() ?: 0L
                     val note = Note(
-                        id = selectionArgs?.get(0)?.toLong() ?: 0L,
-                        visited = values?.getAsBoolean("visited") ?: false,
+                        place_id = values?.getAsLong("place_id") ?: 0L,
                         notes = values?.getAsString("notes") ?: ""
                     )
                     // Обновляем заметку в базе данных
                     database.noteDao().updateNote(note)
-                    rowsUpdated = 1 // Возвращаем количество обновленных строк
+                    rowsUpdated = 1
                 }
                 else -> throw IllegalArgumentException("Unknown URI: $uri")
             }
@@ -130,22 +132,22 @@ class AppContentProvider : ContentProvider() {
         return rowsUpdated
     }
 
-
     override fun delete(uri: Uri, selection: String?, selectionArgs: Array<String>?): Int {
         var rowsDeleted = 0
         CoroutineScope(Dispatchers.IO).launch {
             when (URI_MATCHER.match(uri)) {
                 PLACES -> {
-                    val id = selectionArgs?.get(0)?.toLong() ?: 0L
-                    // Создаем объект Place с только id для удаления
-                    val place = Place(id = id, title = "", description = "", location = "", type = "")
+                    val placeId = selectionArgs?.get(0)?.toLong() ?: 0L
+                    val place = Place(id = placeId, title = "", description = "", location = "", type = "")
                     database.placeDao().deletePlace(place)
                     rowsDeleted = 1 // Возвращаем количество удаленных строк
                 }
                 NOTES -> {
-                    val id = selectionArgs?.get(0)?.toLong() ?: 0L
-                    // Создаем объект Note с только id для удаления
-                    val note = Note(id = id, visited = false, notes = "")
+                    val noteId = selectionArgs?.get(0)?.toLong() ?: 0L
+                    val placeId = selectionArgs?.get(1)?.toLong() ?: 0L // Получаем place_id из selectionArgs
+
+                    // Создаем объект Note с переданным place_id
+                    val note = Note(id = noteId, place_id = placeId, notes = "")
                     database.noteDao().deleteNote(note)
                     rowsDeleted = 1 // Возвращаем количество удаленных строк
                 }
@@ -154,8 +156,6 @@ class AppContentProvider : ContentProvider() {
         }
         return rowsDeleted
     }
-
-
 
 
     override fun getType(uri: Uri): String? {

@@ -22,5 +22,11 @@ interface PlaceDao {
     suspend fun deletePlace(place: Place)
 
     @Query("SELECT * FROM place")
-    fun getAllPlaces(): Flow<List<Place>>  // Возвращаем Flow
+    fun getAllPlaces(): Flow<List<Place>>
+
+    @Query("SELECT * FROM place WHERE id = :id")
+    suspend fun getPlaceById(id: Long): Place  // Новый метод для получения места по ID
+
+    @Query("UPDATE place SET visited = :visited WHERE id = :id")
+    suspend fun updateVisited(id: Long, visited: Boolean)
 }
