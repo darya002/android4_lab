@@ -3,6 +3,7 @@ package com.example.lab4.activities
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -35,12 +36,21 @@ class PlaceDetailsActivity : AppCompatActivity() {
         val placeDescriptionDetail: TextView = findViewById(R.id.place_description_detail)
         val editButton: Button = findViewById(R.id.edit_button)
         val deleteButton: Button = findViewById(R.id.delete_button)
+        val visitedCheckBox: CheckBox = findViewById(R.id.visited_checkbox)
 
         // Подписка на изменения в данных места
         viewModel.place.observe(this) { currentPlace ->
             if (currentPlace != null) {
                 placeNameDetail.text = currentPlace.title
                 placeDescriptionDetail.text = currentPlace.description
+                visitedCheckBox.isChecked = currentPlace.visited
+            }
+        }
+
+        // Отметка места как посещенного
+        visitedCheckBox.setOnCheckedChangeListener { _, isChecked ->
+            place?.let {
+                viewModel.updateVisited(it.id, isChecked)  // Вызов метода из ViewModel
             }
         }
 
@@ -53,7 +63,7 @@ class PlaceDetailsActivity : AppCompatActivity() {
 
         // Удаление
         deleteButton.setOnClickListener {
-            viewModel.deletePlace()
+            viewModel.deletePlace(place)
             Toast.makeText(this, "Place deleted", Toast.LENGTH_SHORT).show()
             finish()
         }

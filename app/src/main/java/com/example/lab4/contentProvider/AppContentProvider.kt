@@ -41,6 +41,7 @@ class AppContentProvider : ContentProvider() {
                 }
                 NOTES -> {
                     val note = Note(
+                        place_id = values?.getAsLong("place_id") ?: 0L,  // Добавляем place_id
                         visited = values?.getAsBoolean("visited") ?: false,
                         notes = values?.getAsString("notes") ?: ""
                     )
@@ -52,7 +53,6 @@ class AppContentProvider : ContentProvider() {
         }
         return Uri.withAppendedPath(uri, "someId") // Здесь возвращаем URI с каким-либо ID
     }
-
 
     override fun query(
         uri: Uri,
@@ -71,9 +71,9 @@ class AppContentProvider : ContentProvider() {
                     // Получаем список мест из базы данных (через Flow)
                     database.placeDao().getAllPlaces().collect { places ->
                         // Используем collect для обработки элементов
-                        places.map { place ->
+                        places.forEach { place ->
                             // Добавляем строку в курсор
-                            cursor.addRow(listOf(place.id, place.title, place.description, place.location, place.type))
+                            cursor.addRow(arrayOf(place.id, place.title, place.description, place.location, place.type))
                         }
                     }
                 }
@@ -81,9 +81,9 @@ class AppContentProvider : ContentProvider() {
                     // Получаем список заметок из базы данных (через Flow)
                     database.noteDao().getAllNotes().collect { notes ->
                         // Используем collect для обработки элементов
-                        notes.map { note ->
+                        notes.forEach { note ->
                             // Добавляем строку в курсор
-                            cursor.addRow(listOf(note.id, note.visited, note.notes))
+                            cursor.addRow(arrayOf(note.id, note.visited, note.notes))
                         }
                     }
                 }
@@ -95,16 +95,15 @@ class AppContentProvider : ContentProvider() {
         return cursor
     }
 
-
-
     override fun update(uri: Uri, values: ContentValues?, selection: String?, selectionArgs: Array<String>?): Int {
         var rowsUpdated = 0
         // Запуск корутины для выполнения асинхронной операции в фоновом потоке
         CoroutineScope(Dispatchers.IO).launch {
             when (URI_MATCHER.match(uri)) {
                 PLACES -> {
+                    val placeId = selectionArgs?.get(0)?.toLong() ?: 0L
                     val place = Place(
-                        id = selectionArgs?.get(0)?.toLong() ?: 0L,
+                        id = placeId,
                         title = values?.getAsString("title") ?: "",
                         description = values?.getAsString("description") ?: "",
                         location = values?.getAsString("location") ?: "",
@@ -115,8 +114,9 @@ class AppContentProvider : ContentProvider() {
                     rowsUpdated = 1 // Возвращаем количество обновленных строк
                 }
                 NOTES -> {
+                    val noteId = selectionArgs?.get(0)?.toLong() ?: 0L
                     val note = Note(
-                        id = selectionArgs?.get(0)?.toLong() ?: 0L,
+                        place_id = values?.getAsLong("place_id") ?: 0L,  // Убедитесь, что place_id передается
                         visited = values?.getAsBoolean("visited") ?: false,
                         notes = values?.getAsString("notes") ?: ""
                     )
@@ -130,22 +130,22 @@ class AppContentProvider : ContentProvider() {
         return rowsUpdated
     }
 
-
     override fun delete(uri: Uri, selection: String?, selectionArgs: Array<String>?): Int {
         var rowsDeleted = 0
         CoroutineScope(Dispatchers.IO).launch {
             when (URI_MATCHER.match(uri)) {
                 PLACES -> {
-                    val id = selectionArgs?.get(0)?.toLong() ?: 0L
-                    // Создаем объект Place с только id для удаления
-                    val place = Place(id = id, title = "", description = "", location = "", type = "")
+                    val placeId = selectionArgs?.get(0)?.toLong() ?: 0L
+                    val place = Place(id = placeId, title = "", description = "", location = "", type = "")
                     database.placeDao().deletePlace(place)
                     rowsDeleted = 1 // Возвращаем количество удаленных строк
                 }
                 NOTES -> {
-                    val id = selectionArgs?.get(0)?.toLong() ?: 0L
-                    // Создаем объект Note с только id для удаления
-                    val note = Note(id = id, visited = false, notes = "")
+                    val noteId = selectionArgs?.get(0)?.toLong() ?: 0L
+                    val placeId = selectionArgs?.get(1)?.toLong() ?: 0L // Получаем place_id из selectionArgs
+
+                    // Создаем объект Note с переданным place_id
+                    val note = Note(id = noteId, place_id = placeId, visited = false, notes = "")
                     database.noteDao().deleteNote(note)
                     rowsDeleted = 1 // Возвращаем количество удаленных строк
                 }
@@ -154,8 +154,6 @@ class AppContentProvider : ContentProvider() {
         }
         return rowsDeleted
     }
-
-
 
 
     override fun getType(uri: Uri): String? {

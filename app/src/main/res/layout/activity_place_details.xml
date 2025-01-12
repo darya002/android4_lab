@@ -20,6 +20,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
+    <CheckBox
+        android:id="@+id/visited_checkbox"
+        android:text="Visited"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
     <Button
         android:id="@+id/edit_button"
         android:text="Edit"

@@ -15,21 +15,23 @@ class PlaceDetailsViewModel(application: Application) : AndroidViewModel(applica
 
     private val placeDao: PlaceDao = AppDatabase.getDatabase(application).placeDao()
 
-    // LiveData для текущего места
     private val _place = MutableLiveData<Place?>()
-    val place: LiveData<Place?> = _place
+    val place: LiveData<Place?> get() = _place
 
-    // Установка текущего места
     fun setPlace(place: Place?) {
         _place.value = place
     }
 
-    // Удаление текущего места
-    fun deletePlace() {
-        _place.value?.let { currentPlace ->
-            viewModelScope.launch(Dispatchers.IO) {
-                placeDao.deletePlace(currentPlace)
-            }
+    fun updateVisited(id: Long, visited: Boolean) {
+        viewModelScope.launch(Dispatchers.IO) {
+            placeDao.updateVisited(id, visited)
+            _place.postValue(placeDao.getPlaceById(id))  // Обновляем данные о месте
+        }
+    }
+
+    fun deletePlace(place: Place) {
+        viewModelScope.launch(Dispatchers.IO) {
+            placeDao.deletePlace(place)
         }
     }
 }

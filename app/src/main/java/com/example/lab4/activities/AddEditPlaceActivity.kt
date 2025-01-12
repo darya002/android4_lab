@@ -32,7 +32,7 @@ class AddEditPlaceActivity : AppCompatActivity() {
         val place = intent.getParcelableExtra<Place>("PLACE")
         viewModel.setPlace(place)
 
-        // Подписка на изменения места
+        // Подписка на изменения в place
         viewModel.place.observe(this) { currentPlace ->
             if (currentPlace != null) {
                 placeName.setText(currentPlace.title)
@@ -53,8 +53,9 @@ class AddEditPlaceActivity : AppCompatActivity() {
             )
             viewModel.savePlace(updatedPlace)
 
-            // Возврат на главный экран
+            // Переход к деталям места после сохранения
             val intent = Intent(this, MainActivity::class.java)
+            intent.putExtra("PLACE", updatedPlace)
             startActivity(intent)
             finish()
         }
