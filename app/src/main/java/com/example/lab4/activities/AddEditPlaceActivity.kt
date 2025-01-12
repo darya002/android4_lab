@@ -3,6 +3,7 @@ package com.example.lab4.activities
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
@@ -24,6 +25,7 @@ class AddEditPlaceActivity : AppCompatActivity() {
         val placeDescription: EditText = findViewById(R.id.place_description)
         val placeLocation: EditText = findViewById(R.id.place_location)
         val placeType: EditText = findViewById(R.id.place_type)
+        val visitedCheckBox: CheckBox = findViewById(R.id.visited_checkbox) // Галочка для посещения
         val saveButton: Button = findViewById(R.id.save_button)
 
         val place = intent.getParcelableExtra<Place>("PLACE")
@@ -35,6 +37,7 @@ class AddEditPlaceActivity : AppCompatActivity() {
                 placeDescription.setText(currentPlace.description)
                 placeLocation.setText(currentPlace.location)
                 placeType.setText(currentPlace.type)
+                visitedCheckBox.isChecked = currentPlace.visited // Отображаем статус посещения
             }
         }
 
@@ -44,11 +47,12 @@ class AddEditPlaceActivity : AppCompatActivity() {
                 title = placeName.text.toString(),
                 description = placeDescription.text.toString(),
                 location = placeLocation.text.toString(),
-                type = placeType.text.toString()
+                type = placeType.text.toString(),
+                visited = visitedCheckBox.isChecked
             )
             viewModel.savePlace(updatedPlace)
 
-            val intent = Intent(this, PlaceDetailsActivity::class.java)
+            val intent = Intent(this, MainActivity::class.java)
             intent.putExtra("PLACE", updatedPlace)
             startActivity(intent)
             finish()

@@ -10,4 +10,9 @@
     <string name="place_name">Place Name</string>
     <string name="enter_your_note">Enter your note</string>
     <string name="save_note">Save Note</string>
+    <string name="visited">Visited</string>
+    <string name="save">Save</string>
+    <string name="type">Type</string>
+    <string name="location">Location</string>
+    <string name="description">Description</string>
 </resources>
