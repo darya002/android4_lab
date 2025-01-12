@@ -5,11 +5,10 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.lab4.dao.NoteDao
 import com.example.lab4.dao.PlaceDao
-import com.example.lab4.entities.Note
 import com.example.lab4.entities.Place
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class AppViewModel(application: Application) : AndroidViewModel(application) {
@@ -17,13 +16,20 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     private val placeDao: PlaceDao = AppDatabase.getDatabase(application).placeDao()
     private val noteDao: NoteDao = AppDatabase.getDatabase(application).noteDao()
 
-    // Используем Flow для списка достопримечательностей
-    val allPlaces: Flow<List<Place>> = placeDao.getAllPlaces()
+    // StateFlow для списка мест
+    private val _allPlaces = MutableStateFlow<List<Place>>(emptyList())
+    val allPlaces: StateFlow<List<Place>> = _allPlaces
 
-    // Используем Flow для списка заметок
-    val allNotes: Flow<List<Note>> = noteDao.getAllNotes()
+    init {
+        // Инициализация данных
+        viewModelScope.launch(Dispatchers.IO) {
+            placeDao.getAllPlaces().collect { places ->
+                _allPlaces.value = places
+            }
+        }
+    }
 
-    // Методы для добавления, обновления и удаления данных
+    // Методы добавления, обновления и удаления данных
     fun addPlace(place: Place) {
         viewModelScope.launch(Dispatchers.IO) {
             placeDao.insertPlace(place)
@@ -42,21 +48,9 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun addNote(note: Note) {
+    fun updateVisited(id: Long, visited: Boolean) {
         viewModelScope.launch(Dispatchers.IO) {
-            noteDao.insertNote(note)
-        }
-    }
-
-    fun updateNote(note: Note) {
-        viewModelScope.launch(Dispatchers.IO) {
-            noteDao.updateNote(note)
-        }
-    }
-
-    fun deleteNote(note: Note) {
-        viewModelScope.launch(Dispatchers.IO) {
-            noteDao.deleteNote(note)
+            placeDao.updateVisited(id, visited)
         }
     }
 }

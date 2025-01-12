@@ -25,5 +25,11 @@
             android:textSize="14sp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
+
+        <CheckBox
+            android:id="@+id/place_visited_checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Посещено" />
     </LinearLayout>
 </androidx.cardview.widget.CardView>
